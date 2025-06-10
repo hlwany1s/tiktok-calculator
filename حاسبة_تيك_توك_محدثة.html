@@ -1,0 +1,161 @@
+
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8" />
+<title>حاسبة شحن عملات تيك توك</title>
+<style>
+  body {
+    font-family: Arial, sans-serif;
+    background: linear-gradient(to bottom, #1e3c72, #2a5298);
+    padding: 30px;
+    color: white;
+    text-align: center;
+  }
+  h1 {
+    margin-bottom: 30px;
+  }
+  .box {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 15px;
+    padding: 20px;
+    margin: 20px auto;
+    width: 90%;
+    max-width: 500px;
+  }
+  input, button {
+    padding: 12px;
+    margin: 10px 0;
+    width: 100%;
+    border-radius: 8px;
+    border: none;
+    font-size: 1.1em;
+  }
+  input {
+    text-align: center;
+  }
+  button {
+    background-color: #00c896;
+    color: white;
+    font-weight: bold;
+    cursor: pointer;
+  }
+  button:hover {
+    background-color: #00a67f;
+  }
+  .result {
+    margin-top: 10px;
+    color: #ffff88;
+    white-space: pre-line;
+    font-size: 1.1em;
+  }
+</style>
+</head>
+<body>
+
+<h1>حاسبة شحن عملات تيك توك</h1>
+
+<div class="box">
+  <label>المبلغ المبعوث من الزبون:</label><br />
+  <input type="number" id="moneyInput" placeholder="المبلغ بالجنيه" />
+  <button onclick="calcCoinsFromPrice()">احسب العملات</button>
+  <div class="result" id="resultMoney"></div>
+</div>
+
+<div class="box">
+  <label>عدد العملات المطلوبة:</label><br />
+  <input type="number" id="coinsInput" placeholder="عدد العملات المطلوبة" />
+  <button onclick="calcPriceFromCoins()">احسب السعر</button>
+  <div class="result" id="resultCoins"></div>
+</div>
+
+<script>
+const prices = [
+  {coins: 75, price: 50}, {coins: 110, price: 70}, {coins: 160, price: 100},
+  {coins: 215, price: 135}, {coins: 300, price: 180}, {coins: 325, price: 190},
+  {coins: 350, price: 205}, {coins: 510, price: 300}, {coins: 700, price: 410},
+  {coins: 870, price: 500}, {coins: 1000, price: 570}, {coins: 1500, price: 855},
+  {coins: 1760, price: 1000}, {coins: 2000, price: 1140}, {coins: 2500, price: 1420},
+  {coins: 3000, price: 1700}, {coins: 3500, price: 1960}, {coins: 4000, price: 2245},
+  {coins: 4500, price: 2530}, {coins: 5000, price: 2810}, {coins: 5500, price: 3080},
+  {coins: 6000, price: 3360}, {coins: 6500, price: 3640}, {coins: 7000, price: 3920},
+  {coins: 8000, price: 4480}, {coins: 9000, price: 5040}, {coins: 10000, price: 5600},
+  {coins: 12000, price: 6700}, {coins: 13000, price: 7260}, {coins: 14000, price: 7885},
+  {coins: 17500, price: 9760}, {coins: 20000, price: 11150}, {coins: 25000, price: 13880},
+  {coins: 30000, price: 16650}, {coins: 36000, price: 20000}, {coins: 50000, price: 27650},
+  {coins: 100000, price: 55150}
+];
+
+function calcCoinsFromPrice() {
+  const money = parseFloat(document.getElementById('moneyInput').value);
+  const result = document.getElementById('resultMoney');
+  if (isNaN(money) || money <= 0) {
+    result.innerText = "من فضلك أدخل مبلغ صحيح.";
+    return;
+  }
+
+  let lower = null, upper = null;
+  for (let i = 0; i < prices.length; i++) {
+    if (prices[i].price === money) {
+      lower = upper = prices[i];
+      break;
+    }
+    if (prices[i].price < money) lower = prices[i];
+    if (prices[i].price > money) {
+      upper = prices[i];
+      break;
+    }
+  }
+
+  if (lower && upper) {
+    const coinDiff = upper.coins - lower.coins;
+    const priceDiff = upper.price - lower.price;
+    const coinsPerPrice = priceDiff === 0 ? 0 : coinDiff / priceDiff;
+    const moneyOverLower = money - lower.price;
+    const approxCoins = lower.coins + coinsPerPrice * moneyOverLower;
+    result.innerText = "💰 لديك " + money + " جنيه\n👤 عدد العملات التقريبي: " + approxCoins.toFixed(0) + " عملة";
+  } else if (lower) {
+    result.innerText = "💰 لديك " + money + " جنيه\n👤 عدد العملات: " + lower.coins + " عملة";
+  } else {
+    result.innerText = "المبلغ أقل من أقل باقة متاحة.";
+  }
+}
+
+function calcPriceFromCoins() {
+  const coinsWanted = parseFloat(document.getElementById('coinsInput').value);
+  const result = document.getElementById('resultCoins');
+  if (isNaN(coinsWanted) || coinsWanted <= 0) {
+    result.innerText = "من فضلك أدخل عدد صحيح من العملات.";
+    return;
+  }
+
+  let lower = null, upper = null;
+  for (let i = 0; i < prices.length; i++) {
+    if (prices[i].coins === coinsWanted) {
+      lower = upper = prices[i];
+      break;
+    }
+    if (prices[i].coins < coinsWanted) lower = prices[i];
+    if (prices[i].coins > coinsWanted) {
+      upper = prices[i];
+      break;
+    }
+  }
+
+  if (lower && upper) {
+    const priceDiff = upper.price - lower.price;
+    const coinDiff = upper.coins - lower.coins;
+    const pricePerCoin = coinDiff === 0 ? 0 : priceDiff / coinDiff;
+    const coinsOverLower = coinsWanted - lower.coins;
+    const approxPrice = lower.price + pricePerCoin * coinsOverLower;
+    result.innerText = "👤 الزبون طلب " + coinsWanted + " عملة\n💰 السعر التقريبي: " + approxPrice.toFixed(2) + " جنيه";
+  } else if (lower) {
+    result.innerText = "👤 الزبون طلب " + coinsWanted + " عملة\n💰 السعر: " + lower.price + " جنيه";
+  } else {
+    result.innerText = "عدد العملات أقل من أقل باقة متاحة.";
+  }
+}
+</script>
+
+</body>
+</html>
